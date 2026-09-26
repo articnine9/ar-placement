@@ -35,10 +35,10 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "necklace",
-    name: "Necklace",
-    description: "A necklace you can try on live using face tracking.",
-    color: "#f472b6",
-    footprint: { width: 0.16, depth: 0.05, height: 0.14 },
+    name: "V-Fringe Necklace",
+    description: "A gold V-collar necklace with diamond-pavé fringe drops, try it on live using face tracking.",
+    color: "#d4b06f",
+    footprint: { width: 0.14, depth: 0.12, height: 0.18 },
     mode: "face",
   },
 ];

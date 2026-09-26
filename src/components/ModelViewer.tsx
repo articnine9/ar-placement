@@ -2,7 +2,7 @@
 
 import { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, ContactShadows } from "@react-three/drei";
+import { OrbitControls, ContactShadows, Environment, Lightformer } from "@react-three/drei";
 import ProductMesh from "./ProductMesh";
 import type { Product } from "@/types/ar";
 
@@ -67,6 +67,12 @@ export default function ModelViewer({ product }: ModelViewerProps) {
             far={shadowFar}
           />
         </Suspense>
+        {/* Soft studio reflections built in-scene (no HDR download) so metals look like metal. */}
+        <Environment resolution={128}>
+          <Lightformer form="rect" intensity={1.5} position={[0, 4, 5]} scale={[10, 3, 1]} />
+          <Lightformer form="rect" intensity={1} position={[-5, 1, 2]} rotation-y={Math.PI / 2} scale={[6, 6, 1]} />
+          <Lightformer form="rect" intensity={0.8} position={[5, 1, 2]} rotation-y={-Math.PI / 2} scale={[6, 6, 1]} />
+        </Environment>
         <OrbitControls
           makeDefault
           enablePan

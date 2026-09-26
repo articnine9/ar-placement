@@ -10,6 +10,22 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* D. Harris Nadar brand, sampled from the logo */
+  --color-brand-gold: #d4b06f;
+  --color-brand-gold-light: #e5cfa8;
+  --color-brand-gold-deep: #8a6a2f;
+  --color-brand-ink: #292626;
+  --color-brand-muted: #6f6863;
+  --color-brand-cream: #faf8f4;
+  --color-brand-stone: #ececec;
+  --font-display: var(--font-cormorant);
+  --font-body: var(--font-jost);
+}
+
+/* OrbitControls sets touch-action:none; allow vertical page scroll over the hero on phones. */
+.hero-canvas canvas {
+  touch-action: pan-y !important;
 }
 
 @media (prefers-color-scheme: dark) {

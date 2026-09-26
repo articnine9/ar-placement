@@ -2,6 +2,7 @@
 
 import * as THREE from "three";
 import type { ProductId } from "@/types/ar";
+import VFringeNecklace, { NECKLACE_BOUNDS } from "./jewelry/VFringeNecklace";
 
 /**
  * Procedural placeholder geometry for each demo product. No GLB assets are
@@ -139,31 +140,12 @@ function Jewelry({ color }: { color: string }) {
   );
 }
 
-function Necklace({ color }: { color: string }) {
-  const gold = "#d4af37";
+function Necklace() {
+  // The shared model is in centimeters with its origin at the neck; convert to
+  // meters and lift it so the lowest drop rests at y = 0 like the other products.
   return (
-    <group>
-      {/* display cushion */}
-      <mesh position={[0, 0.01, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[0.08, 0.085, 0.02, 32]} />
-        <meshStandardMaterial color="#27272a" roughness={0.6} metalness={0.1} />
-      </mesh>
-      {/* chain, coiled flat on the cushion */}
-      <mesh position={[0, 0.024, 0]} rotation={[-Math.PI / 2, 0, 0]} scale={[1, 0.72, 1]}>
-        <torusGeometry args={[0.06, 0.004, 12, 48]} />
-        <meshStandardMaterial color={gold} roughness={0.25} metalness={0.9} />
-      </mesh>
-      {/* pendant resting at the front of the coil */}
-      <mesh position={[0, 0.026, 0.03]} rotation={[Math.PI / 2, 0, 0]}>
-        <coneGeometry args={[0.013, 0.02, 4]} />
-        <meshStandardMaterial
-          color={color}
-          roughness={0.05}
-          metalness={0.2}
-          emissive={color}
-          emissiveIntensity={0.15}
-        />
-      </mesh>
+    <group position={[0, -NECKLACE_BOUNDS.minY * 0.01, 0]} scale={0.01}>
+      <VFringeNecklace />
     </group>
   );
 }
@@ -177,7 +159,7 @@ export default function ProductMesh({ productId, color }: ProductMeshProps) {
     case "plant":
       return <Plant color={color} />;
     case "necklace":
-      return <Necklace color={color} />;
+      return <Necklace />;
     case "jewelry":
       return <Jewelry color={color} />;
     default:

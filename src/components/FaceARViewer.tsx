@@ -9,9 +9,11 @@ import {
   type MutableRefObject,
 } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
+import { Environment, Lightformer } from "@react-three/drei";
 import * as THREE from "three";
 import type { FaceLandmarker } from "@mediapipe/tasks-vision";
 import type { FaceARStatus, Product } from "@/types/ar";
+import VFringeNecklace from "./jewelry/VFringeNecklace";
 
 /**
  * Real face-tracked "try it on" viewer for products worn on the body (e.g. a
@@ -33,49 +35,20 @@ const MODEL_URL =
 
 // MediaPipe's facial transformation matrix lives in its canonical face
 // model's own coordinate space, documented as roughly centimeter-scale
-// around the face center. These offsets were eyeballed from that
-// convention (not measured on a live face) to land around the base of the
-// neck/collar. If the necklace sits too high/low, adjust NECK_OFFSET; if
-// the pendant ends up behind the neck instead of in front, flip FRONT_Z.
-const NECK_OFFSET = new THREE.Vector3(0, -19, 2);
+// around the face center. The necklace model uses the same cm units with its
+// origin at the center of the neck at collar height. These offsets were
+// eyeballed from that convention (not measured on a live face). If the
+// necklace sits too high/low, adjust NECK_OFFSET; if the fringe ends up
+// behind the neck instead of in front, flip FRONT_Z to -1.
+const NECK_OFFSET = new THREE.Vector3(0, -18, 0);
 const FRONT_Z = 1;
-
-function NecklaceModel({ color }: { color: string }) {
-  const gold = "#d4af37";
-  return (
-    <group>
-      {/* chain loop, sized to hang around a neck in this cm-scale space */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} scale={[1, 1, 0.6]}>
-        <torusGeometry args={[7.5, 0.45, 16, 48]} />
-        <meshStandardMaterial color={gold} roughness={0.25} metalness={0.9} />
-      </mesh>
-      {/* pendant drop, hanging on the front-facing side */}
-      <mesh position={[0, -0.9, FRONT_Z * 6]}>
-        <cylinderGeometry args={[0.12, 0.12, 1.6, 8]} />
-        <meshStandardMaterial color={gold} roughness={0.3} metalness={0.85} />
-      </mesh>
-      <mesh position={[0, -2.1, FRONT_Z * 6]}>
-        <octahedronGeometry args={[1.1, 0]} />
-        <meshStandardMaterial
-          color={color}
-          roughness={0.05}
-          metalness={0.2}
-          emissive={color}
-          emissiveIntensity={0.2}
-        />
-      </mesh>
-    </group>
-  );
-}
 
 function FaceAnchoredNecklace({
   matrixRef,
   visibleRef,
-  color,
 }: {
   matrixRef: MutableRefObject<Float32Array | null>;
   visibleRef: MutableRefObject<boolean>;
-  color: string;
 }) {
   const groupRef = useRef<THREE.Group>(null);
   const faceMatrix = useRef(new THREE.Matrix4()).current;
@@ -99,7 +72,14 @@ function FaceAnchoredNecklace({
 
   return (
     <group ref={groupRef} visible={false}>
-      <NecklaceModel color={color} />
+      <group rotation-y={FRONT_Z === 1 ? 0 : Math.PI}>
+        {/* Invisible depth-only neck: hides the chain where it passes behind the neck. */}
+        <mesh position={[0, 6, -0.2]} renderOrder={-1}>
+          <cylinderGeometry args={[5.6, 5.6, 16, 24]} />
+          <meshBasicMaterial colorWrite={false} />
+        </mesh>
+        <VFringeNecklace />
+      </group>
     </group>
   );
 }
@@ -244,9 +224,14 @@ export default function FaceARViewer({ product, onExit }: FaceARViewerProps) {
               dpr={[1, 2]}
               camera={{ position: [0, 0, 0], fov: fovDeg, near: 1, far: 500 }}
             >
-              <ambientLight intensity={1.2} />
-              <directionalLight position={[0, 5, 10]} intensity={0.7} />
-              <FaceAnchoredNecklace matrixRef={matrixRef} visibleRef={visibleRef} color={product.color} />
+              <ambientLight intensity={0.5} />
+              <directionalLight position={[0, 5, 10]} intensity={1.2} />
+              <Environment resolution={128}>
+                <Lightformer form="rect" intensity={2.5} position={[0, 5, 10]} scale={[20, 6, 1]} />
+                <Lightformer form="rect" intensity={1.5} position={[-10, 0, 4]} rotation-y={Math.PI / 2} scale={[10, 10, 1]} />
+                <Lightformer form="rect" intensity={1.2} position={[10, 0, 4]} rotation-y={-Math.PI / 2} scale={[10, 10, 1]} />
+              </Environment>
+              <FaceAnchoredNecklace matrixRef={matrixRef} visibleRef={visibleRef} />
             </Canvas>
           </div>
         )}
